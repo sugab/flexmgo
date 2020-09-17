@@ -220,27 +220,27 @@ func (q *Query) Cursor(m M) df.ICursor {
 					cursor.countParm = nil
 					return cursor
 				}
+
+			case "pipe":
+				pipe := m.Get("pipe")
+
+				cur, err := coll.Aggregate(conn.ctx, pipe, new(options.AggregateOptions).SetAllowDiskUse(true))
+				if err != nil {
+					cursor.SetError(err)
+					return cursor
+				}
+
+				cursor.cursor = cur
+				cursor.conn = conn
+				cursor.countParm = nil
+				return cursor
 			}
 
 		default:
 			cursor.SetError(toolkit.Errorf("invalid command %v", cmdValue))
 			return cursor
 		}
-		/*
-			case "gfsfind":
-					b, err := gridfs.NewBucket(conn.db)
-					qry := q.db.GridFS(tablename).Find(where)
-					cursor.mgocursor = qry
-					cursor.mgoiter = qry.Iter()
-				case "pipe":
-					pipe, ok := m["pipe"]
-					if !ok {
-						cursor.SetError(toolkit.Errorf("invalid command, calling pipe without pipe data"))
-						return cursor
-					}
 
-					cursor.mgoiter = coll.Pipe(pipe).AllowDiskUse().Iter()
-		*/
 		cursor.SetError(fmt.Errorf("pipe and command is not yet applied"))
 		return cursor
 	} else {
