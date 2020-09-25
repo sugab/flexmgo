@@ -27,7 +27,13 @@ func (c *Connection) Connect() error {
 	}
 
 	connURI := "mongodb://"
-	connURI += c.User + ":" + c.Password + "@" + c.Host + "/"
+
+	// Check if credentials given	
+	if c.User != "" && c.Password != "" {
+		connURI += c.User + ":" + c.Password + "@"
+	}
+
+	connURI += c.Host + "/"
 	connURI += configString
 
 	opts := options.Client().ApplyURI(connURI)
